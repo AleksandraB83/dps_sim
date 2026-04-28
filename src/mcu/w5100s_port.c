@@ -51,12 +51,15 @@ void w5100s_port_init(void)
     reg_wizchip_cs_cbfunc(cs_sel, cs_desel);
     reg_wizchip_spi_cbfunc(spi_rb, spi_wb);
 
-    /* 1 KB per socket × 4 = 4 KB total: safe for W5100 and W5100S alike */
-    uint8_t rx_sz[4] = {1, 1, 1, 1};
-    uint8_t tx_sz[4] = {1, 1, 1, 1};
-    int8_t  rc       = wizchip_init(tx_sz, rx_sz);
-    if (rc != 0)
-        printf("W5100S init error: %d\n", rc);
-    else
-        printf("W5100S ready\n");
+    /* HW reset above left the chip in a fully-known state.
+     * Skip wizchip_init(): its internal wizchip_sw_reset() does not wait long
+     * enough for W5100S (library wait ≈ 10 µs; chip needs ≈ 2 ms), so the
+     * buffer-size writes that follow land during the reset and are discarded,
+     * leaving register state undefined.  Configure 1 KB TX/RX per socket
+     * directly instead — chip is fully stable after the 500 ms HW-reset delay. */
+    for (int8_t i = 0; i < _WIZCHIP_SOCK_NUM_; i++) {
+        setSn_TXBUF_SIZE(i, 1);
+        setSn_RXBUF_SIZE(i, 1);
+    }
+    printf("W5100S ready\n");
 }

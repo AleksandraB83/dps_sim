@@ -195,8 +195,16 @@ int main(void)
         .dhcp = NETINFO_STATIC,
     };
     wizchip_setnetinfo(&netinfo);
-    printf("Network: %d.%d.%d.%d\n",
-           NET_IP[0], NET_IP[1], NET_IP[2], NET_IP[3]);
+    {
+        /* Read SIPR back to confirm the write landed.
+         * If this prints 0.0.0.0, the SW-reset delay in w5100s_port_init()
+         * was still too short — increase sleep_ms(20) there. */
+        uint8_t sipr[4];
+        getSIPR(sipr);
+        printf("Network: %d.%d.%d.%d  SIPR=%d.%d.%d.%d\n",
+               NET_IP[0], NET_IP[1], NET_IP[2], NET_IP[3],
+               sipr[0], sipr[1], sipr[2], sipr[3]);
+    }
 
     /* Connection + receive loop with automatic reconnection */
     while (true) {
