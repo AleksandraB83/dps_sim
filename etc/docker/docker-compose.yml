@@ -1,0 +1,9 @@
+services:
+  dps-sim:
+    build:
+      context: ../..
+      dockerfile: etc/docker/Dockerfile
+    ports:
+      - "80:80"
+      - "2000:2000"
+    restart: unless-stopped
