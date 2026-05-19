@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Signal Controller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 1rem;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+            color: #e0e0ff;
+            text-transform: uppercase;
+        }
+
+        .status-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 1.5rem;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .frequency-display {
+            font-size: 4rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #c084fc, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+            margin-bottom: 0.3rem;
+            text-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+        }
+
+        .unit {
+            font-size: 1.4rem;
+            color: #b0b0d0;
+            font-weight: 300;
+            margin-left: 0.3rem;
+        }
+
+        .clients-badge {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.2);
+            border-radius: 2rem;
+            padding: 0.3rem 1.2rem;
+            font-size: 0.9rem;
+            color: #c4b5fd;
+            margin-top: 0.8rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+        }
+
+        .direction-panel {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.3);
+            border-radius: 2rem;
+            padding: 0.6rem 1.2rem;
+            margin: 1rem 0 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .direction-label {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #ccc;
+        }
+
+        .direction-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: #1e1a3a;
+            padding: 0.2rem 1rem;
+            border-radius: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .direction-forward {
+            color: #a3e635;
+            border-left: 3px solid #a3e635;
+        }
+
+        .direction-backward {
+            color: #f87171;
+            border-left: 3px solid #f87171;
+        }
+
+        button.dir-btn {
+            background: linear-gradient(135deg, #3b2a6b, #5b4b9b);
+            border: none;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        button.dir-btn:hover {
+            background: linear-gradient(135deg, #5b4b9b, #7c6bc9);
+        }
+
+        .control-group {
+            margin: 1.5rem 0 1.2rem;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            flex: 1 1 180px;
+            padding: 1rem 1.2rem;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 1.2rem;
+            background: rgba(0, 0, 0, 0.35);
+            color: #ffffff;
+            outline: none;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"]:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 18px rgba(167, 139, 250, 0.6);
+            background: rgba(20, 10, 40, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            letter-spacing: 0.8px;
+            backdrop-filter: blur(5px);
+            transition: all 0.25s;
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #8b5cf6, #c084fc);
+            box-shadow: 0 12px 28px rgba(139, 92, 246, 0.7);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+        }
+
+        .message {
+            margin-top: 1.2rem;
+            font-size: 0.95rem;
+            color: #ccc;
+            min-height: 1.8rem;
+            transition: 0.2s;
+        }
+
+        .error {
+            color: #f87171;
+            font-weight: 500;
+        }
+
+        .success {
+            color: #a3e635;
+            font-weight: 500;
+        }
+
+        .refresh-hint {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #8888aa;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        @media (max-width: 450px) {
+            .container {
+                padding: 2rem 1.2rem;
+            }
+            .frequency-display {
+                font-size: 3.2rem;
+            }
+            button {
+                padding: 0.9rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ DPS Signal</h1>
+
+        <div class="status-panel">
+            <div style="display: flex; align-items: baseline; justify-content: center;">
+                <span class="frequency-display" id="currentFreq">--</span>
+                <span class="unit">Hz</span>
+            </div>
+            <div class="clients-badge" id="clientsInfo">⏳ загрузка...</div>
+        </div>
+
+        <!-- Новая панель направления движения -->
+        <div class="direction-panel">
+            <span class="direction-label">🚦 Направление:</span>
+            <span class="direction-value" id="directionDisplay">---</span>
+            <button id="toggleDirectionBtn" class="dir-btn">⟳ Сменить</button>
+        </div>
+
+        <div class="control-group">
+            <div class="input-wrapper">
+                <input type="number" id="freqInput" placeholder="Новая частота" min="1" step="1" value="100">
+                <button id="updateBtn">Обновить</button>
+            </div>
+        </div>
+
+        <div id="messageBox" class="message"></div>
+        <div class="refresh-hint">
+            <span id="lastUpdate">🕒 ожидание данных...</span>
+        </div>
+        <div class="auto-refresh">
+            <label>
+                <input type="checkbox" id="autoRefreshCheckbox"> автообновление (3 сек)
+            </label>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- конфигурация ----------
+            const API_BASE = 'http://localhost:8080';
+
+            // DOM элементы
+            const currentFreqEl = document.getElementById('currentFreq');
+            const clientsInfoEl = document.getElementById('clientsInfo');
+            const freqInput = document.getElementById('freqInput');
+            const updateBtn = document.getElementById('updateBtn');
+            const messageBox = document.getElementById('messageBox');
+            const lastUpdateEl = document.getElementById('lastUpdate');
+            const autoRefreshCheckbox = document.getElementById('autoRefreshCheckbox');
+            const directionDisplay = document.getElementById('directionDisplay');
+            const toggleDirectionBtn = document.getElementById('toggleDirectionBtn');
+
+            let autoRefreshTimer = null;
+            const AUTO_REFRESH_INTERVAL = 3000;
+
+            // текущее направление (синхронизируется с сервером)
+            let currentDirection = 'forward'; // 'forward' или 'backward'
+
+            // ---------- вспомогательные функции ----------
+            function formatTime() {
+                const now = new Date();
+                return now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
+            function showMessage(text, isError = false) {
+                messageBox.textContent = text;
+                messageBox.className = 'message ' + (isError ? 'error' : 'success');
+                setTimeout(() => {
+                    if (messageBox.textContent === text) {
+                        messageBox.textContent = '';
+                        messageBox.className = 'message';
+                    }
+                }, 5000);
+            }
+
+            // Обновление UI: частота, клиенты, направление
+            function updateDisplay(frequency, clients, direction) {
+                if (frequency !== undefined && frequency !== null) {
+                    currentFreqEl.textContent = frequency;
+                }
+                if (clients !== undefined && clients !== null) {
+                    clientsInfoEl.textContent = `🔌 подключено клиентов: ${clients}`;
+                }
+                if (direction !== undefined) {
+                    currentDirection = direction;
+                    if (direction === 'forward') {
+                        directionDisplay.textContent = 'ВПЕРЁД ➡';
+                        directionDisplay.className = 'direction-value direction-forward';
+                    } else if (direction === 'backward') {
+                        directionDisplay.textContent = 'НАЗАД ⬅';
+                        directionDisplay.className = 'direction-value direction-backward';
+                    } else {
+                        directionDisplay.textContent = direction;
+                    }
+                }
+                lastUpdateEl.textContent = `🕒 обновлено: ${formatTime()}`;
+            }
+
+            // ---------- GET /frequency (теперь возвращает ещё и direction) ----------
+            async function fetchCurrentState() {
+                try {
+                    const response = await fetch(`${API_BASE}/frequency`);
+                    if (!response.ok) {
+                        throw new Error(`Ошибка HTTP: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    // ожидаем { frequency, clients, direction }
+                    if (typeof data.frequency !== 'number') {
+                        throw new Error('Некорректный ответ сервера');
+                    }
+                    updateDisplay(data.frequency, data.clients, data.direction);
+                    freqInput.value = data.frequency;
+                    return data;
+                } catch (err) {
+                    console.error('Ошибка получения состояния:', err);
+                    showMessage(`Не удалось получить данные: ${err.message}`, true);
+                    if (currentFreqEl.textContent === '--') {
+                        currentFreqEl.textContent = 'ошибка';
+                        clientsInfoEl.textContent = '⚠️ нет соединения';
+                    }
+                    throw err;
+                }
+            }
+
+            // ---------- POST /frequency (установка частоты) ----------
+            async function setFrequency(newFreq) {
+                try {
+                    const response = await fetch(`${API_BASE}/frequency`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ frequency: newFreq }),
+                    });
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`Ошибка ${response.status}: ${errorBody || 'не удалось обновить'}`);
+                    }
+                    const data = await response.json();
+                    updateDisplay(data.frequency, data.clients, data.direction);
+                    showMessage(`✅ Частота установлена: ${data.frequency} Гц`, false);
+                    freqInput.value = data.frequency;
+                    return data;
+                } catch (err) {
+                    console.error('Ошибка установки частоты:', err);
+                    showMessage(`❌ ${err.message}`, true);
+                    throw err;
+                }
+            }
+
+            // ---------- POST /direction (переключение направления) ----------
+            async function setDirection(newDirection) {
+                try {
+                    const response = await fetch(`${API_BASE}/direction`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ direction: newDirection }),
+                    });
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`Ошибка ${response.status}: ${errorBody || 'не удалось сменить направление'}`);
+                    }
+                    const data = await response.json();
+                    // ответ сервера: { direction, clients, frequency? } – обновим всё
+                    updateDisplay(data.frequency, data.clients, data.direction);
+                    showMessage(`🔄 Направление изменено на ${data.direction === 'forward' ? 'ВПЕРЁД' : 'НАЗАД'}`, false);
+                    return data;
+                } catch (err) {
+                    console.error('Ошибка смены направления:', err);
+                    showMessage(`❌ ${err.message}`, true);
+                    throw err;
+                }
+            }
+
+            // Обработчик кнопки "Сменить направление"
+            async function handleToggleDirection() {
+                const newDir = currentDirection === 'forward' ? 'backward' : 'forward';
+                toggleDirectionBtn.disabled = true;
+                toggleDirectionBtn.textContent = '⏳';
+                try {
+                    await setDirection(newDir);
+                } finally {
+                    toggleDirectionBtn.disabled = false;
+                    toggleDirectionBtn.textContent = '⟳ Сменить';
+                }
+            }
+
+            async function handleUpdateClick() {
+                const rawValue = freqInput.value.trim();
+                if (rawValue === '') {
+                    showMessage('Введите значение частоты', true);
+                    freqInput.focus();
+                    return;
+                }
+                const newFreq = Number(rawValue);
+                if (!Number.isInteger(newFreq) || newFreq <= 0) {
+                    showMessage('Частота должна быть целым положительным числом', true);
+                    freqInput.focus();
+                    return;
+                }
+                updateBtn.disabled = true;
+                updateBtn.textContent = '⏳';
+                try {
+                    await setFrequency(newFreq);
+                } finally {
+                    updateBtn.disabled = false;
+                    updateBtn.textContent = 'Обновить';
+                }
+            }
+
+            // Автообновление
+            function startAutoRefresh() {
+                if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+                autoRefreshTimer = setInterval(async () => {
+                    try {
+                        await fetchCurrentState();
+                    } catch (e) {}
+                }, AUTO_REFRESH_INTERVAL);
+            }
+            function stopAutoRefresh() {
+                if (autoRefreshTimer) {
+                    clearInterval(autoRefreshTimer);
+                    autoRefreshTimer = null;
+                }
+            }
+            function toggleAutoRefresh() {
+                if (autoRefreshCheckbox.checked) startAutoRefresh();
+                else stopAutoRefresh();
+            }
+
+            // Инициализация
+            async function init() {
+                try {
+                    await fetchCurrentState();
+                } catch (e) {}
+                updateBtn.addEventListener('click', handleUpdateClick);
+                toggleDirectionBtn.addEventListener('click', handleToggleDirection);
+                freqInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleUpdateClick();
+                });
+                autoRefreshCheckbox.addEventListener('change', toggleAutoRefresh);
+                // опционально: включить автообновление по умолчанию
+                // autoRefreshCheckbox.checked = true; startAutoRefresh();
+            }
+
+            window.addEventListener('DOMContentLoaded', init);
+            window.addEventListener('beforeunload', () => stopAutoRefresh());
+        })();
+    </script>
+</body>
+</html>
