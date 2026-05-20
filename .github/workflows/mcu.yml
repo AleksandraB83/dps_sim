@@ -5,10 +5,13 @@ on:
     branches: [master]
     paths:
       - 'src/mcu/**'
+      - '.github/workflows/mcu.yml'
   pull_request:
     branches: [master]
     paths:
       - 'src/mcu/**'
+      - '.github/workflows/mcu.yml'
+  workflow_dispatch:
 
 jobs:
   build-firmware:
