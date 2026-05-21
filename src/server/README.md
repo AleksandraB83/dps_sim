@@ -41,6 +41,28 @@ pip install -r requirements.txt
 
 ---
 
+## Тестирование
+
+Установить зависимости для тестов:
+
+```bash
+cd src/server
+pip install -r requirements-test.txt
+```
+
+Запустить тесты:
+
+```bash
+venv/bin/pytest tests/ -v
+```
+
+Тесты находятся в [tests/test_server.py](tests/test_server.py) и покрывают:
+- утилиты `_state_frame`, `_broadcast_state`;
+- все REST-эндпоинты (`GET`/`POST /frequency`, `GET`/`POST /direction`);
+- TCP-обработчик `mcu_tcp_handler` (подключение, отключение, ошибки).
+
+---
+
 ## Запуск
 
 ```bash
